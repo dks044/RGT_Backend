@@ -47,8 +47,7 @@ public class UserController {
 			String accessToken = tokenProvider.create(user);
 			tokenProvider.generateAndSetAccessTokenCookie(accessToken, response);
 			String refreshToken = tokenProvider.createRefreshToken(user);
-			return ResponseEntity.ok()
-								.body(
+			return ResponseEntity.ok().body(
 								ResponseUserDTO.builder()
 									.userName(user.getUserName())
 									.build()
