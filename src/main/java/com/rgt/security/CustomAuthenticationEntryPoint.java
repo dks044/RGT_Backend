@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
 	//잘못된 인증 정보로 인한 접근 시 401 오류를 반환하도록 커스터마이징
