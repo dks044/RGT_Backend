@@ -19,7 +19,6 @@ import lombok.Setter;
 @Entity
 @Builder
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class SiteUser {
