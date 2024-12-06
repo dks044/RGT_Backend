@@ -25,8 +25,6 @@ public class SecurityConfig {
     
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired
-    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     
     @Autowired
     @Qualifier("customCorsConfigurationSource")
@@ -45,18 +43,20 @@ public class SecurityConfig {
             .httpBasic(HttpBasicConfigurer::disable)
             .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                    .requestMatchers("/", "/api/**", 
-                    		"/swagger-ui/**", 
-                    		"/v3/api-docs/**", 
-                    		"/swagger-ui.html", 
-                    		"/webjars/**", 
-                    		"/api-docs/swagger-config",
-                    		"/api-docs/**"
-                    		).permitAll()
-                    .anyRequest().authenticated());
+                    .requestMatchers("/", 
+                            "/api/auth/login", 
+                            "/api/auth/signup", 
+                            "/swagger-ui/**", 
+                            "/v3/api-docs/**", 
+                            "/swagger-ui.html", 
+                            "/webjars/**", 
+                            "/api-docs/swagger-config",
+                            "/api-docs/**").permitAll() // 인증이 필요 없는 경로
+                        .requestMatchers("/api/auth/set-password").authenticated() // 인증이 필요한 경로
+                        .anyRequest().authenticated()); // 나머지 요청은 인증 필요
 
-        http.addFilterAfter(jwtAuthenticationFilter, CorsFilter.class)
-                .exceptionHandling(handling -> handling.authenticationEntryPoint(customAuthenticationEntryPoint));
+        http.addFilterAfter(jwtAuthenticationFilter, CorsFilter.class);
+//                .exceptionHandling(handling -> handling.authenticationEntryPoint(customAuthenticationEntryPoint));
         
         return http.build();
     }

@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rgt.security.TokenProvider;
 import com.rgt.user.dto.CreateUserDTO;
+import com.rgt.user.dto.LoginDTO;
+import com.rgt.user.dto.ResponseUserDTO;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,4 +39,24 @@ public class UserController {
                                  .body("Failed to create user due to an unexpected error.");
         }
     }
+    
+    @PostMapping("/login")
+    public ResponseEntity<?> authenticate(HttpServletResponse response,@RequestBody LoginDTO loginDTO){
+    	try {
+			SiteUser user = userService.find(loginDTO.getUserName(), loginDTO.getPassword());
+			String accessToken = tokenProvider.create(user);
+			tokenProvider.generateAndSetAccessTokenCookie(accessToken, response);
+			String refreshToken = tokenProvider.createRefreshToken(user);
+			return ResponseEntity.ok()
+								.body(
+								ResponseUserDTO.builder()
+									.userName(user.getUserName())
+									.build()
+								);
+		} catch (Exception e) {
+			log.error("Invalid credentials => "+e.getMessage());
+			return ResponseEntity.badRequest().body("Invalid credentials");
+		}
+    }
+    
 }

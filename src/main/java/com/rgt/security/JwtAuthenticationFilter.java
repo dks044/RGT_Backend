@@ -1,5 +1,6 @@
 package com.rgt.security;
 
+import java.util.*;
 import java.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.rgt.constants.PublicApiEndpoints;
 import com.rgt.user.SiteUser;
 import com.rgt.user.UserRepository;
 
@@ -33,6 +35,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+    	
+        // 토큰 검증을 스킵하는 API 리스트
+        if (Arrays.stream(PublicApiEndpoints.getAllValues())
+                .anyMatch(apiUrl -> request.getRequestURI().equals(apiUrl))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+    	
         String token = parseBearerToken(request);
 
         if (token != null) {

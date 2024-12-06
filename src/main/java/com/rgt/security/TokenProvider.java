@@ -29,6 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+//TODO: 배포환경에 맞춰서 도메인 등 변경 필요
+//TODO: secure(true)는 HTTPS 연결에서만 쿠키를 전송하도록 설정
+//TODO: sameSite(Cookie.SameSite.NONE.attributeValue())는 쿠키가 모든 크로스사이트 요청에 대해 전송되도록 설정
+//이 경우, Secure 속성과 함께 사용해야 하므로 HTTPS 환경에서만 사용해야함!
 public class TokenProvider {
 	
 	private final StringRedisTemplate stringRedisTemplate;
@@ -61,9 +65,9 @@ public class TokenProvider {
 		return claims.getSubject();
 	}
 	
-	//리프래쉬 토큰 생성
+	//리프래쉬 토큰 생성 (+Redis 할당)
 	public String createRefreshToken(final SiteUser user) {
-	    Date expiryDate = Date.from(Instant.now().plus(14, ChronoUnit.DAYS)); // 예: 14일 후 만료
+	    Date expiryDate = Date.from(Instant.now().plus(7, ChronoUnit.DAYS)); //7일 후 만료
 	    SecretKey secretKey = Keys.hmacShaKeyFor(AppConstants.getJwtSecret().getBytes());
 	    
 	    String refreshToken = Jwts.builder()
@@ -112,11 +116,12 @@ public class TokenProvider {
     // 액세스 토큰을 쿠키로 발급하고 클라이언트에 전송
     public void generateAndSetAccessTokenCookie(String token, HttpServletResponse response) {
         ResponseCookie responseCookie = ResponseCookie.from("access", token)
-                .domain(AppConstants.getDomain())
+                //.domain(AppConstants.getDomain())
                 .path("/")
                 .httpOnly(true)
-                .secure(true)
-                .sameSite(Cookie.SameSite.NONE.attributeValue())
+                .secure(false)
+                //.sameSite(Cookie.SameSite.NONE.attributeValue())
+                .sameSite(Cookie.SameSite.LAX.attributeValue())
                 .build();
         
         response.setHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
@@ -125,11 +130,12 @@ public class TokenProvider {
     //쿠키에 포함된 액세스 토큰을 제거
     public void deleteAccessTokenFromCookie(HttpServletRequest request, HttpServletResponse response) {
 		ResponseCookie deleteCookie = ResponseCookie.from("access", "")
-		        .domain(AppConstants.getDomain())
+		        //.domain(AppConstants.getDomain())
 		        .path("/")
 		        .httpOnly(true)
-		        .secure(true)
-		        .sameSite(Cookie.SameSite.NONE.attributeValue())
+		        .secure(false)
+		        //.sameSite(Cookie.SameSite.NONE.attributeValue())
+		        .sameSite(Cookie.SameSite.LAX.attributeValue())
 		        .maxAge(0)
 		        .build();
 		response.addHeader("Set-Cookie", deleteCookie.toString());

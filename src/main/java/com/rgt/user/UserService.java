@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jakarta.security.auth.message.AuthException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -32,5 +33,14 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+    }
+    
+    @Transactional
+    public SiteUser find(String userName, String password) throws AuthException {
+        SiteUser user = userRepository.findByUserName(userName);
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+            throw new AuthException("Invalid credentials");
+        }
+        return user;
     }
 }
