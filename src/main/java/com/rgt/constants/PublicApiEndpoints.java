@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum PublicApiEndpoints {
     API_LOGIN("/api/auth/login"),
-    API_SIGNUP("/api/auth/signup");
+    API_SIGNUP("/api/auth/signup"),
+    API_BOOKS("/api/books");
 
     private final String value;
 

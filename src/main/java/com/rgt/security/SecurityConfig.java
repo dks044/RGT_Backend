@@ -46,14 +46,13 @@ public class SecurityConfig {
                     .requestMatchers("/", 
                             "/api/auth/login", 
                             "/api/auth/signup",
-                            "/api/auth/books",
+                            "/api/books",
                             "/swagger-ui/**", 
                             "/v3/api-docs/**", 
                             "/swagger-ui.html", 
                             "/webjars/**", 
                             "/api-docs/swagger-config",
                             "/api-docs/**").permitAll() // 인증이 필요 없는 경로
-                        .requestMatchers("/api/auth/set-password").authenticated() // 인증이 필요한 경로
                         .anyRequest().authenticated()); // 나머지 요청은 인증 필요
 
         http.addFilterAfter(jwtAuthenticationFilter, CorsFilter.class);

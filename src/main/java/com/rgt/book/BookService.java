@@ -12,18 +12,21 @@ import lombok.RequiredArgsConstructor;
 public class BookService {
 	private final BookRepository bookRepository;
 	
-    public Page<Book> searchBooks(String author, String bookName, Pageable pageable) {
-        return bookRepository.findAll((Specification<Book>) (root, query, criteriaBuilder) -> {
-            var predicates = criteriaBuilder.conjunction();
-            if (author != null && !author.isEmpty()) {
-                predicates = criteriaBuilder.and(predicates, criteriaBuilder.like(root.get("author"), "%" + author + "%"));
-            }
-            if (bookName != null && !bookName.isEmpty()) {
-                predicates = criteriaBuilder.and(predicates, criteriaBuilder.like(root.get("bookName"), "%" + bookName + "%"));
-            }
-            return predicates;
-        }, pageable);
-    }
+	public Page<Book> searchBooks(String searchTerm, Pageable pageable) {
+	    return bookRepository.findAll((Specification<Book>) (root, query, criteriaBuilder) -> {
+	        var predicates = criteriaBuilder.conjunction();
+	        
+	        if (searchTerm != null && !searchTerm.isEmpty()) {
+	            // author와 bookName에 대해 OR 조건으로 검색
+	            predicates = criteriaBuilder.or(
+	                criteriaBuilder.like(root.get("author"), "%" + searchTerm + "%"),
+	                criteriaBuilder.like(root.get("bookName"), "%" + searchTerm + "%")
+	            );
+	        }
+	        
+	        return predicates;
+	    }, pageable);
+	}
     
     public Book createBook(Book book) {
         return bookRepository.save(book);

@@ -58,7 +58,7 @@ public class TokenProvider {
 	public String validateAndGetUserId(String token) {
 		
 		Claims claims = Jwts.parserBuilder()
-				.setSigningKey(AppConstants.getJwtSecret())
+				.setSigningKey(Keys.hmacShaKeyFor(AppConstants.getJwtSecret().getBytes()))
 				.build()
 				.parseClaimsJws(token)
 				.getBody();

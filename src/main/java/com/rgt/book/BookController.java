@@ -24,33 +24,31 @@ import lombok.RequiredArgsConstructor;
 public class BookController {
 	private final BookService bookService;
 	
-    @GetMapping
-    public ResponseEntity<?> getBooks(
-            @RequestParam(required = false) String author,
-            @RequestParam(required = false) String bookName,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        try {
-            Pageable pageable = PageRequest.of(page, size);
-            Page<Book> books = bookService.searchBooks(author, bookName, pageable);
-            return ResponseEntity.ok(books);
-        } catch (Exception e) {
-            
-            return ResponseEntity.internalServerError().body("Server error");
-        }
-    }
+	@GetMapping
+	public ResponseEntity<?> getBooks(
+	        @RequestParam(name = "searchTerm", required = false) String searchTerm, 
+	        @RequestParam(name = "page", defaultValue = "0") int page,
+	        @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
+	    try {
+	        Pageable pageable = PageRequest.of(page, size);
+	        Page<Book> books = bookService.searchBooks(searchTerm, pageable); 
+	        return ResponseEntity.ok(books);
+	    } catch (Exception e) {
+	        return ResponseEntity.internalServerError().body("Server error");
+	    }
+	}
     
     @PostMapping
     public ResponseEntity<?> createBook(@RequestBody CreateBookDTO createBookDTO) {
         try {
             Book createdBook = bookService.createBook(Book.builder()
-            														.bookName(createBookDTO.getBookName())
-            														.author(createBookDTO.getAuthor())
-            														.amount(createBookDTO.getAmount())
-            														.description(createBookDTO.getDescription())
-            														.price(createBookDTO.getPrice())
-            														.publicationDate(createBookDTO.getPublicationDate())
-            														.build());
+															.bookName(createBookDTO.getBookName())
+															.author(createBookDTO.getAuthor())
+															.amount(createBookDTO.getAmount())
+															.description(createBookDTO.getDescription())
+															.price(createBookDTO.getPrice())
+															.publicationDate(createBookDTO.getPublicationDate())
+															.build());
             return ResponseEntity.status(201).body(createdBook);
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Book name must be unique.");
