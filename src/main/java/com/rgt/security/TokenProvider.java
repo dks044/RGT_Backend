@@ -3,6 +3,8 @@ package com.rgt.security;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.crypto.SecretKey;
@@ -49,20 +51,27 @@ public class TokenProvider {
 					.setIssuer(AppConstants.getApplicationName())
 					.setIssuedAt(new Date())
 					.setExpiration(expiryDate)
+					.claim("roles", user.getRole().getValue())
 					.signWith(secretKey,SignatureAlgorithm.HS512)
 					.compact();
-	
+		log.info("user role {} ",user.getRole().getValue());
 		return token;
 	}
 	//검증된 사용자의 userId을 조회
-	public String validateAndGetUserId(String token) {
-		
-		Claims claims = Jwts.parserBuilder()
-				.setSigningKey(AppConstants.getJwtSecret())
-				.build()
-				.parseClaimsJws(token)
-				.getBody();
-		return claims.getSubject();
+	public Map<String, Object> validateAndGetUserId(String token) {
+	    Claims claims = Jwts.parserBuilder()
+	            .setSigningKey(Keys.hmacShaKeyFor(AppConstants.getJwtSecret().getBytes()))
+	            .build()
+	            .parseClaimsJws(token)
+	            .getBody();
+	    
+	    String roles = claims.get("roles", String.class);
+	    log.info("User roles: {}", roles);
+	    
+	    Map<String, Object> userInfo = new HashMap<>();
+	    userInfo.put("userId", claims.getSubject());
+	    userInfo.put("roles", roles);
+	    return userInfo;
 	}
 	
 	//리프래쉬 토큰 생성 (+Redis 할당)
@@ -76,6 +85,7 @@ public class TokenProvider {
 				.setIssuedAt(new Date())
 				.setExpiration(expiryDate)
 				.claim("token_type", "refresh")
+				.claim("roles", user.getRole().getValue())
 				.signWith(secretKey,SignatureAlgorithm.HS512)
 				.compact();
 
@@ -117,14 +127,16 @@ public class TokenProvider {
     public void generateAndSetAccessTokenCookie(String token, HttpServletResponse response) {
         ResponseCookie responseCookie = ResponseCookie.from("access", token)
                 //.domain(AppConstants.getDomain())
+        		.maxAge(1 * 24 * 60 * 60)
                 .path("/")
                 .httpOnly(true)
                 .secure(false)
                 //.sameSite(Cookie.SameSite.NONE.attributeValue())
-                .sameSite(Cookie.SameSite.LAX.attributeValue())
+//                .sameSite(Cookie.SameSite.LAX.attributeValue())
+                .sameSite("None")
                 .build();
         
-        response.setHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+        response.setHeader("Set-Cookie", responseCookie.toString());
     }
 	
     //쿠키에 포함된 액세스 토큰을 제거

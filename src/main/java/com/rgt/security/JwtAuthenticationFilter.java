@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -35,65 +36,91 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-    	
-        // 토큰 검증을 스킵하는 API 리스트
-        if (Arrays.stream(PublicApiEndpoints.getAllValues())
-                .anyMatch(apiUrl -> request.getRequestURI().equals(apiUrl))) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-    	
+        log.info("Received request for URI: {}", request.getRequestURI());
+
         String token = parseBearerToken(request);
 
-        if (token != null) {
-            handleTokenAuthentication(token, response);
-        }
-
-        filterChain.doFilter(request, response);
-    }
-
-    private void handleTokenAuthentication(String token, HttpServletResponse response) throws IOException {
-        try {
-            String userId = tokenProvider.validateAndGetUserId(token);
-            authenticateUser(userId);
-        } catch (ExpiredJwtException e) {
-            handleExpiredToken(e, response);
-        }
-    }
-
-    private void authenticateUser(String userId) {
-        AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userId, null, AuthorityUtils.NO_AUTHORITIES);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    private void handleExpiredToken(ExpiredJwtException e, HttpServletResponse response) throws IOException {
-        String expiredTokenUserId = e.getClaims().getSubject();
-        if (expiredTokenUserId != null) {
-            refreshAccessToken(expiredTokenUserId, response);
-        } else {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        }
-    }
-
-    private void refreshAccessToken(String userId, HttpServletResponse response) throws IOException {
-        SiteUser user = userRepository.findById(Long.parseLong(userId)).orElse(null);
-        if (user == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"User not found\"}");
+        if (token == null) {
+            log.warn("No JWT token found in cookies.");
+            filterChain.doFilter(request, response); // 403 응답 대신 다음 필터로 진행
             return;
         }
 
-        // Redis에서 리프레시 토큰을 가져옴
-        boolean isRefreshTokenValid = tokenProvider.validateRefreshToken(user);
-        if (isRefreshTokenValid) {
-            String newAccessToken = tokenProvider.create(user);
-            tokenProvider.generateAndSetAccessTokenCookie(newAccessToken, response); // 쿠키로 설정
-        } else {
+        try {
+            Map<String, Object> userInfo = tokenProvider.validateAndGetUserId(token); // userId와 roles을 가져옴
+            String userId = (String) userInfo.get("userId");
+            String roles = (String) userInfo.get("roles");
+            authenticateUser(userId, roles); // 사용자 인증 설정
+        } catch (ExpiredJwtException e) {
+            log.error("Expired JWT token: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"error\": \"Invalid or expired refresh token\"}");
+            return;
+        } catch (JwtException e) {
+            log.error("Invalid JWT token: {}", e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        filterChain.doFilter(request, response); // 다음 필터로 진행
+    }
+
+//    private void handleTokenAuthentication(String token, HttpServletResponse response) throws IOException {
+//        try {
+//            Map<String, Object> userInfo = tokenProvider.validateAndGetUserId(token);
+//            String userId = (String) userInfo.get("userId");
+//            String roles = (String) userInfo.get("roles");
+//            authenticateUser(userId, roles);
+//        } catch (ExpiredJwtException e) {
+//            log.error("Expired JWT token: {}", e.getMessage());
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//        } catch (JwtException e) {
+//            log.error("Invalid JWT token: {}", e.getMessage());
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//        }
+//    }
+
+    private void authenticateUser(String userId, String roles) {
+        SiteUser user = userRepository.findById(Long.parseLong(userId)).orElse(null);
+        
+        if (user != null) {
+            log.info("User found: {}", user);
+            List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(roles);
+            log.info("Authorities: {}", authorities);
+            AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userId, null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+            log.warn("User not found with ID: {}", userId);
         }
     }
+
+//    private void handleExpiredToken(ExpiredJwtException e, HttpServletResponse response) throws IOException {
+//        String expiredTokenUserId = e.getClaims().getSubject();
+//        if (expiredTokenUserId != null) {
+//            refreshAccessToken(expiredTokenUserId, response);
+//        } else {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//        }
+//    }
+
+//    private void refreshAccessToken(String userId, HttpServletResponse response) throws IOException {
+//        SiteUser user = userRepository.findById(Long.parseLong(userId)).orElse(null);
+//        if (user == null) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            response.getWriter().write("{\"error\": \"User not found\"}");
+//            return;
+//        }
+//
+//        // Redis에서 리프레시 토큰을 가져옴
+//        boolean isRefreshTokenValid = tokenProvider.validateRefreshToken(user);
+//        if (isRefreshTokenValid) {
+//            String newAccessToken = tokenProvider.create(user);
+//            tokenProvider.generateAndSetAccessTokenCookie(newAccessToken, response); // 쿠키로 설정
+//        } else {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//            response.getWriter().write("{\"error\": \"Invalid or expired refresh token\"}");
+//        }
+//    }
 
     private String parseBearerToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
@@ -104,6 +131,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
-        throw new JwtException("Access token not found in cookies");
+        
+        log.warn("No JWT token found in cookies.");
+        return null; // JWT가 없을 경우 null 반환
     }
 }
