@@ -1,5 +1,6 @@
-FROM gradle:7.6-jdk17 AS builder
+FROM gradle:7.6-jdk17-alpine as builder
 WORKDIR /build
+
 
 # 그래들 파일이 변경되었을 때만 새롭게 의존패키지 다운로드 받게함.
 COPY build.gradle settings.gradle /build/
