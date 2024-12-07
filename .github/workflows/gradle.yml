@@ -20,6 +20,7 @@ jobs:
       #  repository secrets에 올린 application.properties을 빌드 시 생성
       - name: Make application.properties
         run: |
+          mkdir -p ./src/main/resources
           cd ./src/main/resources
           touch ./application.properties
           echo "${{ secrets.APPLICATION }}" > ./application.properties
