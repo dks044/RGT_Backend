@@ -1,21 +1,21 @@
-# 사용할 base 이미지 선택
-FROM arm64v8/eclipse-temurin:17-jdk-focal AS builder
+FROM gradle:7.6-jdk17-alpine as builder
+WORKDIR /build
 
-# 작업 디렉토리 설정
+# 그래들 파일이 변경되었을 때만 새롭게 의존패키지 다운로드 받게함.
+COPY build.gradle settings.gradle /build/
+RUN gradle build -x test --parallel --continue > /dev/null 2>&1 || true
+
+# 빌더 이미지에서 애플리케이션 빌드
+COPY . /build
+RUN gradle build -x test --parallel
+
+# APP
+FROM openjdk:17.0-slim
 WORKDIR /app
 
-# Gradle 빌드 파일 복사
-COPY build.gradle settings.gradle ./
-COPY src ./src
+# 빌더 이미지에서 jar 파일만 복사
+COPY --from=builder /build/build/libs/*-SNAPSHOT.jar ./app.jar
 
-# 애플리케이션 빌드 (테스트 스킵)
-RUN ./gradlew build -x test --no-daemon
-
-# build/libs/ 에 있는 jar 파일을 JAR_FILE 변수에 저장
-ARG JAR_FILE=build/libs/*.jar
-
-# JAR_FILE을 app.jar로 복사
-COPY ${JAR_FILE} app.jar
 
 # Docker 컨테이너가 시작될 때 /app.jar 실행 
 # 애플리케이션 timezone을 대한민국으로 설정
