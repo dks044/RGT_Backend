@@ -1,5 +1,5 @@
-# Gradle을 사용하여 애플리케이션을 빌드
-FROM gradle:7.6-jdk17-alpine as builder
+# EC2 아키텍처 유형에 맞게 변경해야함
+FROM arm64v8/eclipse-temurin:17-jdk-focal
 
 # 작업 디렉토리 설정
 WORKDIR /app
