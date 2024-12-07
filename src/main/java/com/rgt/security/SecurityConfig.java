@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -36,6 +37,7 @@ public class SecurityConfig {
     @Qualifier("customCorsConfigurationSource")
     private CorsConfigurationSource configurationSource;
     
+    //INFO: 모든경로에 인증이 필요없게 설정 후, 컨트롤러 메소드에만 추가적으로 권한 라우트 설정함
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
@@ -55,7 +57,8 @@ public class SecurityConfig {
                                      "/swagger-ui.html", 
                                      "/webjars/**", 
                                      "/api-docs/swagger-config",
-                                     "/api-docs/**")
+                                     "/api-docs/**"
+                    				)
                     .permitAll() // 인증이 필요 없는 경로
                     .anyRequest()
                     .authenticated()); // 나머지 요청은 인증 필요

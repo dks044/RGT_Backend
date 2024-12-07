@@ -6,32 +6,34 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rgt.book.dto.CreateBookDTO;
+import com.rgt.book.dto.UpdateBookDTO;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/books")
 public class BookController {
 	private final BookService bookService;
 	
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/test")
-	public ResponseEntity<?> test(){
-		try {
-			return ResponseEntity.ok().body("hi요");
-		} catch (Exception e) {
-			return ResponseEntity.internalServerError().body("Server error");
-		}
+	public String test() {
+		return "hi";
 	}
 	
 	
@@ -50,7 +52,7 @@ public class BookController {
 	}
     
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getBook(@PathVariable("bookId") Long id) {
+	public ResponseEntity<?> getBook(@PathVariable("id") Long id) {
 	    try {
 	        Book book = bookService.getBookById(id);
 	        if (book != null) {
@@ -63,6 +65,7 @@ public class BookController {
 	    }
 	}
 	
+	@PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<?> createBook(@RequestBody CreateBookDTO createBookDTO) {
         try {
@@ -80,5 +83,17 @@ public class BookController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Server error");
         }
+    }
+    
+	@PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBook(@PathVariable("id") Long id, @RequestBody UpdateBookDTO updateBookDTO){
+    	try {
+    		Book updateBook = bookService.setBookById(id, updateBookDTO);
+    		return ResponseEntity.ok().body(updateBook);
+		} catch (Exception e) {
+			log.error("Book not found with Id => "+id);
+			return ResponseEntity.badRequest().body("Book not found with Id => "+id);
+		}
     }
 }

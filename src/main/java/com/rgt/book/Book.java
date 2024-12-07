@@ -34,4 +34,5 @@ public class Book {
     private int price;
     
     private Date publicationDate;
+   
 }

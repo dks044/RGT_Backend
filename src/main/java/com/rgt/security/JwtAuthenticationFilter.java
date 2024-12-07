@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -35,47 +36,62 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-    	log.info("Received request for URI: {}", request.getRequestURI());
-    	
-        // 토큰 검증을 스킵하는 API 리스트
-    	if (Arrays.stream(PublicApiEndpoints.values())
-    	        .map(PublicApiEndpoints::getValue)
-    	        .anyMatch(endpoint -> endpoint.equals(request.getRequestURI()))) {
-    	    filterChain.doFilter(request, response); 
-    	    return;
-    	}
-        
+        log.info("Received request for URI: {}", request.getRequestURI());
+
         String token = parseBearerToken(request);
-        
+
         if (token == null) {
             log.warn("No JWT token found in cookies.");
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403 응답
+            filterChain.doFilter(request, response); // 403 응답 대신 다음 필터로 진행
             return;
         }
-        
-        log.info("JWT token found: {}", token);
-        
-        handleTokenAuthentication(token, response);
-        filterChain.doFilter(request, response);
-    }
 
-    private void handleTokenAuthentication(String token, HttpServletResponse response) throws IOException {
         try {
-            String userId = tokenProvider.validateAndGetUserId(token);
-            authenticateUser(userId);
+            Map<String, Object> userInfo = tokenProvider.validateAndGetUserId(token); // userId와 roles을 가져옴
+            String userId = (String) userInfo.get("userId");
+            String roles = (String) userInfo.get("roles");
+            authenticateUser(userId, roles); // 사용자 인증 설정
         } catch (ExpiredJwtException e) {
             log.error("Expired JWT token: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         } catch (JwtException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
+
+        filterChain.doFilter(request, response); // 다음 필터로 진행
     }
 
-    private void authenticateUser(String userId) {
-        AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userId, null, AuthorityUtils.NO_AUTHORITIES);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+//    private void handleTokenAuthentication(String token, HttpServletResponse response) throws IOException {
+//        try {
+//            Map<String, Object> userInfo = tokenProvider.validateAndGetUserId(token);
+//            String userId = (String) userInfo.get("userId");
+//            String roles = (String) userInfo.get("roles");
+//            authenticateUser(userId, roles);
+//        } catch (ExpiredJwtException e) {
+//            log.error("Expired JWT token: {}", e.getMessage());
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//        } catch (JwtException e) {
+//            log.error("Invalid JWT token: {}", e.getMessage());
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//        }
+//    }
+
+    private void authenticateUser(String userId, String roles) {
+        SiteUser user = userRepository.findById(Long.parseLong(userId)).orElse(null);
+        
+        if (user != null) {
+            log.info("User found: {}", user);
+            List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(roles);
+            log.info("Authorities: {}", authorities);
+            AbstractAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    userId, null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else {
+            log.warn("User not found with ID: {}", userId);
+        }
     }
 
 //    private void handleExpiredToken(ExpiredJwtException e, HttpServletResponse response) throws IOException {
