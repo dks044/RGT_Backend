@@ -117,14 +117,16 @@ public class TokenProvider {
     public void generateAndSetAccessTokenCookie(String token, HttpServletResponse response) {
         ResponseCookie responseCookie = ResponseCookie.from("access", token)
                 //.domain(AppConstants.getDomain())
+        		.maxAge(1 * 24 * 60 * 60)
                 .path("/")
                 .httpOnly(true)
                 .secure(false)
                 //.sameSite(Cookie.SameSite.NONE.attributeValue())
-                .sameSite(Cookie.SameSite.LAX.attributeValue())
+//                .sameSite(Cookie.SameSite.LAX.attributeValue())
+                .sameSite("None")
                 .build();
         
-        response.setHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+        response.setHeader("Set-Cookie", responseCookie.toString());
     }
 	
     //쿠키에 포함된 액세스 토큰을 제거

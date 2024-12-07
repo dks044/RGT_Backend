@@ -31,4 +31,8 @@ public class BookService {
     public Book createBook(Book book) {
         return bookRepository.save(book);
     }
+    
+    public Book getBookById(Long id) {
+        return bookRepository.findById(id).orElse(null);
+    }
 }

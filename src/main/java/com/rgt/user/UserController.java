@@ -43,6 +43,8 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(HttpServletResponse response,@RequestBody LoginDTO loginDTO){
     	try {
+    		System.out.println(loginDTO.getUserName());
+    		System.out.println(loginDTO.getPassword());
 			SiteUser user = userService.find(loginDTO.getUserName(), loginDTO.getPassword());
 			String accessToken = tokenProvider.create(user);
 			tokenProvider.generateAndSetAccessTokenCookie(accessToken, response);

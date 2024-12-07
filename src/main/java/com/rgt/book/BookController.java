@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,16 @@ import lombok.RequiredArgsConstructor;
 public class BookController {
 	private final BookService bookService;
 	
+	@GetMapping("/test")
+	public ResponseEntity<?> test(){
+		try {
+			return ResponseEntity.ok().body("hi요");
+		} catch (Exception e) {
+			return ResponseEntity.internalServerError().body("Server error");
+		}
+	}
+	
+	
 	@GetMapping
 	public ResponseEntity<?> getBooks(
 	        @RequestParam(name = "searchTerm", required = false) String searchTerm, 
@@ -38,6 +49,20 @@ public class BookController {
 	    }
 	}
     
+	@GetMapping("/{id}")
+	public ResponseEntity<?> getBook(@PathVariable("bookId") Long id) {
+	    try {
+	        Book book = bookService.getBookById(id);
+	        if (book != null) {
+	            return ResponseEntity.ok(book);
+	        } else {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Book not found");
+	        }
+	    } catch (Exception e) {
+	        return ResponseEntity.internalServerError().body("Server error");
+	    }
+	}
+	
     @PostMapping
     public ResponseEntity<?> createBook(@RequestBody CreateBookDTO createBookDTO) {
         try {
