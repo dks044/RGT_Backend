@@ -41,7 +41,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
-          username: ec2-user
+          username: ubuntu
           key: ${{ secrets.KEY }}
           script: |
             sudo docker rm -f $(sudo docker ps -aq) # 모든 컨테이너를 강제로 제거
