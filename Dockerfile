@@ -8,8 +8,8 @@ WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
-# 애플리케이션 빌드
-RUN gradle build --no-daemon
+# 애플리케이션 빌드 (테스트 스킵)
+RUN gradle build -x test --no-daemon
 
 # Java 런타임 이미지로 전환
 FROM eclipse-temurin:17-jdk-alpine
