@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.rgt.book.dto.UpdateBookDTO;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class BookService {
     }
     
     @Transactional
-    public Book setBookById(Long id,UpdateBookDTO updateBookDTO) {
+    public Book setBook(Long id,UpdateBookDTO updateBookDTO) {
     	Optional<Book> book = bookRepository.findById(id);
     	if(book.isPresent()) {
     		bookRepository.save(
@@ -64,5 +65,17 @@ public class BookService {
     		log.error("Book not found with Id => "+id);
     		throw new RuntimeException("Book not found with Id => "+id);
     	}
+    }
+    
+    @Transactional
+    public Book deleteBook(Long id) {
+        Optional<Book> deleteBook = bookRepository.findById(id);
+        if(deleteBook.isPresent()) {
+        	bookRepository.delete(deleteBook.get());
+        	return deleteBook.get();
+        }else {
+        	throw new EntityNotFoundException("Book not found with id "+id);
+        }
+ 
     }
 }

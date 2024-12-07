@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.rgt.book.dto.CreateBookDTO;
 import com.rgt.book.dto.UpdateBookDTO;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -89,11 +91,24 @@ public class BookController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateBook(@PathVariable("id") Long id, @RequestBody UpdateBookDTO updateBookDTO){
     	try {
-    		Book updateBook = bookService.setBookById(id, updateBookDTO);
+    		Book updateBook = bookService.setBook(id, updateBookDTO);
     		return ResponseEntity.ok().body(updateBook);
 		} catch (Exception e) {
 			log.error("Book not found with Id => "+id);
 			return ResponseEntity.badRequest().body("Book not found with Id => "+id);
 		}
     }
+	
+	@PreAuthorize("hasRole('ADMIN')")
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteBook(@PathVariable("id") Long id) {
+	    try {
+	        Book deletedBook = bookService.deleteBook(id);
+	        return ResponseEntity.ok().body(deletedBook);
+	    } catch (EntityNotFoundException e) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+	    } catch (Exception e) {
+	        return ResponseEntity.internalServerError().body("Server error");
+	    }
+	}
 }
