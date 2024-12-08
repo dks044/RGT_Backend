@@ -126,7 +126,6 @@ public class TokenProvider {
     // 액세스 토큰을 쿠키로 발급하고 클라이언트에 전송
     public void generateAndSetAccessTokenCookie(String token, HttpServletResponse response) {
         ResponseCookie responseCookie = ResponseCookie.from("access", token)
-                .domain(AppConstants.getDomain())
         		.maxAge(1 * 24 * 60 * 60)
                 .path("/")
                 .httpOnly(true)
@@ -140,7 +139,6 @@ public class TokenProvider {
     //쿠키에 포함된 액세스 토큰을 제거
     public void deleteAccessTokenFromCookie(HttpServletRequest request, HttpServletResponse response) {
 		ResponseCookie deleteCookie = ResponseCookie.from("access", "")
-		        .domain(AppConstants.getDomain())
 		        .path("/")
 		        .httpOnly(true)
 		        .secure(false)
