@@ -18,6 +18,8 @@ import com.rgt.user.dto.CreateUserDTO;
 import com.rgt.user.dto.LoginDTO;
 import com.rgt.user.dto.ResponseUserDTO;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +29,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "사용자 인증 관련 API")
 public class UserController {
 	private final UserService userService;
 	private final TokenProvider tokenProvider;
 	
-
+    @Operation(summary = "사용자 가입", description = "새로운 사용자를 등록합니다.")
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody CreateUserDTO createUserDTO) {
         try {
@@ -47,6 +50,7 @@ public class UserController {
         }
     }
     
+    @Operation(summary = "사용자 로그인", description = "사용자를 인증하고 액세스 토큰을 생성합니다.")
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(HttpServletResponse response, @RequestBody LoginDTO loginDTO) {
         try {
@@ -75,6 +79,7 @@ public class UserController {
     }
 
     
+    @Operation(summary = "사용자 로그아웃", description = "사용자를 로그아웃하고 인증 정보를 제거합니다.")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         try {
