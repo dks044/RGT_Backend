@@ -1,11 +1,9 @@
 package com.rgt.user;
 
 import java.time.LocalDateTime;
-import java.util.List;
-
-
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,12 +12,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Builder
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class SiteUser {
@@ -34,4 +30,7 @@ public class SiteUser {
 	
     //회원가입일
     private LocalDateTime createUserDate;
+    
+    @Convert(converter = UserRoleConverter.class)
+    private UserRole role = UserRole.USER;
 }

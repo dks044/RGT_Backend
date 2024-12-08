@@ -19,8 +19,8 @@ public class UserTest {
 	@Test
 	@Transactional
 	@Rollback(false)
-	void 유저생성테스트() {
-		userService.create("admin", "rgtsubject");
+	void 어드민_유저생성테스트() {
+		userService.create("admin", "rgtsubject",true);
 		SiteUser foundUser =  userRepository.findByUserName("admin");
 		assertNotNull(foundUser);
 	}
