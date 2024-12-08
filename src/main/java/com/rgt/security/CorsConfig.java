@@ -21,7 +21,7 @@ public class CorsConfig {
         // CloudFront 도메인과 로컬 개발 환경 동시 허용
 
         //TODO: 프론트 배포후 도메인 추가 필요
-        config.setAllowedOrigins(Arrays.asList(AppConstants.getDomain()));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
 
         
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
