@@ -122,33 +122,29 @@ public class TokenProvider {
 	    }
 	}
 	
-	
+	//TODO: 배포환경 개발환경 구분하여 설정
     // 액세스 토큰을 쿠키로 발급하고 클라이언트에 전송
     public void generateAndSetAccessTokenCookie(String token, HttpServletResponse response) {
         ResponseCookie responseCookie = ResponseCookie.from("access", token)
-                //.domain(AppConstants.getDomain())
+                .domain(AppConstants.getDomain())
         		.maxAge(1 * 24 * 60 * 60)
                 .path("/")
                 .httpOnly(true)
                 .secure(false)
-                .sameSite(Cookie.SameSite.NONE.attributeValue())
-                //.sameSite(Cookie.SameSite.NONE.attributeValue())
-//                .sameSite(Cookie.SameSite.LAX.attributeValue())
                 .sameSite("None")
                 .build();
         
         response.setHeader("Set-Cookie", responseCookie.toString());
     }
-	
+  //TODO: 배포환경 개발환경 구분하여 설정
     //쿠키에 포함된 액세스 토큰을 제거
     public void deleteAccessTokenFromCookie(HttpServletRequest request, HttpServletResponse response) {
 		ResponseCookie deleteCookie = ResponseCookie.from("access", "")
-		        //.domain(AppConstants.getDomain())
+		        .domain(AppConstants.getDomain())
 		        .path("/")
 		        .httpOnly(true)
 		        .secure(false)
-		        //.sameSite(Cookie.SameSite.NONE.attributeValue())
-		        .sameSite(Cookie.SameSite.NONE.attributeValue())
+		        .sameSite("None")
 		        .maxAge(0)
 		        .build();
 		response.addHeader("Set-Cookie", deleteCookie.toString());
