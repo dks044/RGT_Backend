@@ -1,11 +1,12 @@
 package com.rgt.user.dto;
 
+import com.rgt.user.UserRole;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 @Builder
 @Getter
@@ -13,4 +14,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ResponseUserDTO {
 	String userName;
+	UserRole role;
 }
