@@ -34,11 +34,12 @@ public class UserController {
 	private final UserService userService;
 	private final TokenProvider tokenProvider;
 	
+	//회원 생성 권한 기본값 ADMIN
     @Operation(summary = "사용자 가입", description = "새로운 사용자를 등록합니다.")
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody CreateUserDTO createUserDTO) {
         try {
-            userService.create(createUserDTO.getUserName(), createUserDTO.getPassword(),false);
+            userService.create(createUserDTO.getUserName(), createUserDTO.getPassword(),true);
             return ResponseEntity.ok("User successfully created.");
         } catch (IllegalArgumentException e) {
             log.error("Failed to create user: {}", e.getMessage());
