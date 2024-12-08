@@ -49,15 +49,16 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorizeHttpRequests -> 
                 authorizeHttpRequests
                     .requestMatchers("/", 
-                                     "/api/auth/login", 
-                                     "/api/auth/signup",
-                                     "/api/books",
-                                     "/swagger-ui/**", 
-                                     "/v3/api-docs/**", 
-                                     "/swagger-ui.html", 
-                                     "/webjars/**", 
-                                     "/api-docs/swagger-config",
-                                     "/api-docs/**"
+//                                     "/api/auth/login", 
+//                                     "/api/auth/signup",
+//                                     "/api/books",
+//                                     "/swagger-ui/**", 
+//                                     "/v3/api-docs/**", 
+//                                     "/swagger-ui.html", 
+//                                     "/webjars/**", 
+//                                     "/api-docs/swagger-config",
+//                                     "/api-docs/**"
+                    				 "/**"
                     				)
                     .permitAll() // 인증이 필요 없는 경로
                     .anyRequest()
