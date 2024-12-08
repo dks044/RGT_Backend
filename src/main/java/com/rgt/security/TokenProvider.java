@@ -130,7 +130,7 @@ public class TokenProvider {
                 .path("/")
                 .httpOnly(true)
                 .domain("ajn-backend.kro.kr")
-                .secure(true)
+                .secure(false)
                 .sameSite("None")
                 .build();
         
@@ -143,7 +143,7 @@ public class TokenProvider {
 		        .path("/")
 		        .httpOnly(true)
 		        .domain("ajn-backend.kro.kr")
-		        .secure(true)
+		        .secure(false)
 		        .sameSite("None")
 		        .maxAge(0)
 		        .build();
