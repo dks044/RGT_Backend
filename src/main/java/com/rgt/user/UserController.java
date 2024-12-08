@@ -4,15 +4,15 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import jakarta.servlet.http.Cookie;
 import com.rgt.security.TokenProvider;
 import com.rgt.user.dto.CreateUserDTO;
 import com.rgt.user.dto.LoginDTO;
@@ -105,5 +105,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                  .body("Failed to log out due to an unexpected error.");
         }
+    }
+    
+    @Operation(summary = "사용자 검증", description = "현재 사용자가 인가된 사용자인지 검증하고 Boolean타입으로 유무를 반환합니다.")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @GetMapping("/authentication")
+    public ResponseEntity<Boolean> isAuthentication(HttpServletRequest request) {
+        // 인증된 사용자의 경우
+        return ResponseEntity.ok().body(true);
     }
 }
