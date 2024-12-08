@@ -131,6 +131,7 @@ public class TokenProvider {
                 .path("/")
                 .httpOnly(true)
                 .secure(false)
+                .sameSite(Cookie.SameSite.NONE.attributeValue())
                 //.sameSite(Cookie.SameSite.NONE.attributeValue())
 //                .sameSite(Cookie.SameSite.LAX.attributeValue())
                 .sameSite("None")
@@ -147,7 +148,7 @@ public class TokenProvider {
 		        .httpOnly(true)
 		        .secure(false)
 		        //.sameSite(Cookie.SameSite.NONE.attributeValue())
-		        .sameSite(Cookie.SameSite.LAX.attributeValue())
+		        .sameSite(Cookie.SameSite.NONE.attributeValue())
 		        .maxAge(0)
 		        .build();
 		response.addHeader("Set-Cookie", deleteCookie.toString());
