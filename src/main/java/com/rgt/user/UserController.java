@@ -71,6 +71,7 @@ public class UserController {
             return ResponseEntity.ok()
                 .body(ResponseUserDTO.builder()
                     .userName(user.getUserName())
+                    .role(user.getRole())
                     .build());
         } catch (Exception e) {
             log.error("Invalid credentials => " + e.getMessage());
