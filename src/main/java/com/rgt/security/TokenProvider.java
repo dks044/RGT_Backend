@@ -129,7 +129,8 @@ public class TokenProvider {
         		.maxAge(1 * 24 * 60 * 60)
                 .path("/")
                 .httpOnly(true)
-                .secure(false)
+                .domain("ajn-backend.kro.kr")
+                .secure(true)
                 .sameSite("None")
                 .build();
         
@@ -141,7 +142,8 @@ public class TokenProvider {
 		ResponseCookie deleteCookie = ResponseCookie.from("access", "")
 		        .path("/")
 		        .httpOnly(true)
-		        .secure(false)
+		        .domain("ajn-backend.kro.kr")
+		        .secure(true)
 		        .sameSite("None")
 		        .maxAge(0)
 		        .build();
