@@ -50,6 +50,7 @@ public class BookController {
 	    }
 	}
     
+	
 	@Operation(summary = "특정 도서 조회", description = "ID로 특정 도서를 조회합니다.")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getBook(@PathVariable("id") Long id) {
