@@ -5,7 +5,10 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,9 +64,9 @@ public class UserController {
             String refreshToken = tokenProvider.createRefreshToken(user);
             
             // 사용자 권한 설정
-//            List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRole().getValue());
-//            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user.getUserName(), null, authorities);
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
+            List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(user.getRole().getValue());
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user.getUserName(), null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             
             // [디버깅용] 사용자 로그인 
             String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
