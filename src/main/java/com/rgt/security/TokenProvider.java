@@ -129,7 +129,7 @@ public class TokenProvider {
         		.maxAge(1 * 24 * 60 * 60)
                 .path("/")
                 .httpOnly(true)
-                //.domain("rgt-subject.kro.kr")
+                .domain("rgt-subject.kro.kr")
                 .secure(true)
                 .sameSite(Cookie.SameSite.NONE.attributeValue())
                 .build();
@@ -140,9 +140,9 @@ public class TokenProvider {
     //쿠키에 포함된 액세스 토큰을 제거
     public void deleteAccessTokenFromCookie(HttpServletRequest request, HttpServletResponse response) {
 		ResponseCookie deleteCookie = ResponseCookie.from("access", "")
-		        .path("/")
+		        .path("/")	
 		        .httpOnly(true)
-		        //.domain("rgt-subject.kro.kr")
+		        .domain("rgt-subject.kro.kr")
 		        .secure(true)
 		        .sameSite(Cookie.SameSite.NONE.attributeValue())
 		        .maxAge(0)
