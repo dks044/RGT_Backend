@@ -23,7 +23,8 @@ public class CorsConfig {
         //TODO: 프론트 배포후 도메인 추가 필요
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000", // 로컬 개발 환경
-                "https://www.rgt-subject.kro.kr" // 배포 환경 도메인
+                "https://www.rgt-subject.kro.kr", // 배포 환경 도메인
+                "https://rgt-frontend.vercel.app"
             ));
 
         
