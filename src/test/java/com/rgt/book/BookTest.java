@@ -25,7 +25,7 @@ public class BookTest {
             Book book = Book.builder()
                     .bookName("Book " + i)
                     .author("Author " + i)
-                    .amount("10")
+                    .amount(10)
                     .description("Description for Book " + i)
                     .price(1000 + (i * 10))
                     .publicationDate(new Date())

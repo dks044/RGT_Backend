@@ -129,9 +129,9 @@ public class TokenProvider {
         		.maxAge(1 * 24 * 60 * 60)
                 .path("/")
                 .httpOnly(true)
-                .domain("rgt-subject.kro.kr")
+                //.domain("rgt-subject.kro.kr")
                 .secure(true)
-                .sameSite("None")
+                .sameSite(Cookie.SameSite.NONE.attributeValue())
                 .build();
         
         response.setHeader("Set-Cookie", responseCookie.toString());
@@ -142,9 +142,9 @@ public class TokenProvider {
 		ResponseCookie deleteCookie = ResponseCookie.from("access", "")
 		        .path("/")
 		        .httpOnly(true)
-		        .domain("rgt-subject.kro.kr")
+		        //.domain("rgt-subject.kro.kr")
 		        .secure(true)
-		        .sameSite("None")
+		        .sameSite(Cookie.SameSite.NONE.attributeValue())
 		        .maxAge(0)
 		        .build();
 		response.addHeader("Set-Cookie", deleteCookie.toString());
