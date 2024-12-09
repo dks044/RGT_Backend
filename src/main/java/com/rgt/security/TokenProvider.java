@@ -124,30 +124,31 @@ public class TokenProvider {
 	
 	//TODO: 배포환경 개발환경 구분하여 설정
     // 액세스 토큰을 쿠키로 발급하고 클라이언트에 전송
-    public void generateAndSetAccessTokenCookie(String token, HttpServletResponse response) {
-        ResponseCookie responseCookie = ResponseCookie.from("access", token)
-        		.maxAge(1 * 24 * 60 * 60)
-                .path("/")
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("None")
-                .build();
-        
-        response.setHeader("Set-Cookie", responseCookie.toString());
-    }
-  //TODO: 배포환경 개발환경 구분하여 설정
-    //쿠키에 포함된 액세스 토큰을 제거
-    public void deleteAccessTokenFromCookie(HttpServletRequest request, HttpServletResponse response) {
-		ResponseCookie deleteCookie = ResponseCookie.from("access", "")
-		        .path("/")
-		        .httpOnly(true)
-		        .secure(false)
-		        .sameSite("None")
-		        .maxAge(0)
-		        .build();
-		response.addHeader("Set-Cookie", deleteCookie.toString());
-		log.info("User's access token removed successfully");
-    }
+	public void generateAndSetAccessTokenCookie(String token, HttpServletResponse response) {
+	    ResponseCookie responseCookie = ResponseCookie.from("access", token)
+	            .domain("localhost") // 로컬 개발 환경에서는 localhost, 배포 시 도메인 변경 필요
+	            .maxAge(1 * 24 * 60 * 60) // 1일
+	            .path("/")
+	            .httpOnly(true)
+	            .secure(false) // HTTPS 사용 시 true로 설정
+	            .sameSite(Cookie.SameSite.LAX.attributeValue()) // 개발 환경에서는 LAX로 설정
+	            .build();
+	    
+	    response.setHeader(HttpHeaders.SET_COOKIE, responseCookie.toString());
+	}
+
+	public void deleteAccessTokenFromCookie(HttpServletRequest request, HttpServletResponse response) {
+	    ResponseCookie deleteCookie = ResponseCookie.from("access", "")
+	            .domain("localhost")
+	            .path("/")
+	            .httpOnly(true)
+	            .secure(false) // HTTPS 사용 시 true로 설정
+	            .sameSite(Cookie.SameSite.LAX.attributeValue()) // 개발 환경에서는 LAX로 설정
+	            .maxAge(0)
+	            .build();
+	    response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+	    log.info("User's access token removed successfully");
+	}
     
     // 레디스에 저장된 리프래쉬 토큰을 제거
     public void deleteRefreshTokenFromRedis(final SiteUser user) {

@@ -19,7 +19,7 @@ public class UpdateBookDTO {
     
     private String author;
     
-    private String amount;
+    private int amount;
     
     private String description;
     
